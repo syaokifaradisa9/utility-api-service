@@ -1,7 +1,6 @@
 # Utility REST API Service
 
 ![version](https://img.shields.io/badge/version-1.0.0-blue)
-![license](https://img.shields.io/badge/license-MIT-green)
 
 API service yang menyediakan berbagai utilitas dan tools melalui antarmuka REST API.
 
