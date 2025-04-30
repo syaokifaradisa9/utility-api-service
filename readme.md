@@ -2,7 +2,9 @@
 
 ![version](https://img.shields.io/badge/version-1.0.0-blue)
 
-API service yang menyediakan berbagai utilitas dan tools melalui antarmuka REST API.
+**Utility REST API Service** adalah aplikasi backend yang dibuat menggunakan bahasa pemrograman **Python** dengan framework **FastAPI**. Aplikasi ini dirancang untuk menyediakan berbagai utilitas dan tools melalui antarmuka REST API, termasuk fitur konversi file PDF ke gambar, autentikasi menggunakan API key, dan pembatasan request (rate limiting).
+
+Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasikan ke berbagai frontend atau sistem lainnya melalui endpoint HTTP.
 
 ## 🚀 Fitur
 
