@@ -7,3 +7,4 @@ fastapi-limiter
 redis
 slowapi
 python-multipart
+MuPDF

@@ -1,2 +1,30 @@
-/.env
-/.venv
+# Virtual environment
+.venv/
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+
+# Environment files
+.env
+.env.*
+
+# Output images
+output_page_*.png
+
+# IDE/editor files
+*.idea/
+*.vscode/
+
+# Logs
+*.log
+
+# MacOS
+.DS_Store
+
+# Global cache
+__pycache__/
+**/__pycache__/
+
+# Khusus untuk folder routers
+app/api/v1/routers/__pycache__/
