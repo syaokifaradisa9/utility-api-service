@@ -11,3 +11,4 @@ slowapi
 python-multipart
 Pillow
 PyMuPDF 
+numpy

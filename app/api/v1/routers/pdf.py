@@ -19,7 +19,7 @@ async def pdf_to_image(
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="File must be a PDF")
     data = await file.read()
-    # DPI bisa diambil dari query param jika diinginkan, contoh tetap pakai default 150
+    
     image_bytes = await convert_pdf_to_single_image(data, dpi=150)
     return StreamingResponse(
         io.BytesIO(image_bytes),
@@ -33,7 +33,7 @@ async def convert_to_text(
     request: Request,
     file: UploadFile = File(...),
     dpi: int = 300,
-    language: str = "en",  # Default language is English
+    language: str = "en",
     x_api_key: str = Depends(verify_api_key)
 ):
     """Extract text from PDF with automatic fallback to OCR if needed"""
@@ -54,7 +54,6 @@ async def convert_to_text(
             content={
                 "detail": result["error"],
                 "page_count": result["page_count"],
-                "used_ocr": result.get("used_ocr", False)
             }
         )
     
@@ -62,9 +61,7 @@ async def convert_to_text(
     return JSONResponse(
         content={
             "text": result["text"],
-            "page_count": result["page_count"],
-            "used_ocr": result.get("used_ocr", False),
-            "fallback_to_ocr": result.get("fallback_to_ocr", False)
+            "page_count": result["page_count"]
         },
         headers={"Content-Disposition": "attachment; filename=extracted_text.json"}
     )
