@@ -1,11 +1,13 @@
+wheel
+setuptools
+build
 fastapi
 uvicorn
 python-dotenv
-pypdf
 pdf2image
 fastapi-limiter
 redis
 slowapi
 python-multipart
-MuPDF
 Pillow
+PyMuPDF 
