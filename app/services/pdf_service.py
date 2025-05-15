@@ -179,3 +179,93 @@ async def convert_pdf_to_text_with_ocr(data: bytes, dpi: int = 300, lang: list =
             "used_ocr": False,
             "error": f"Error processing PDF with Tesseract OCR: {str(e)}"
         }
+        
+async def replace_template_with_image(pdf_data: bytes, template_text: str, image_data: bytes, image_width: float = None, image_height: float = None) -> bytes:
+    """
+    Replace text template patterns in a PDF with an image
+    
+    Args:
+        pdf_data (bytes): The PDF file content
+        template_text (str): The template text to search for (e.g., "${sign}")
+        image_data (bytes): The image to insert
+        image_width (float, optional): Width to resize the image to (in points)
+        image_height (float, optional): Height to resize the image to (in points)
+        
+    Returns:
+        bytes: The modified PDF content
+    """
+    try:
+        # Open the PDF
+        pdf = fitz.open(stream=pdf_data, filetype="pdf")
+        
+        # Load image
+        img_temp = tempfile.NamedTemporaryFile(delete=False)
+        img_temp.write(image_data)
+        img_temp.close()
+        
+        # Track if we found and replaced any instances
+        replacements_made = False
+        
+        # Process each page
+        for page_num in range(len(pdf)):
+            page = pdf[page_num]
+            
+            # Search for the template text in the page
+            text_instances = page.search_for(template_text)
+            
+            for inst in text_instances:
+                replacements_made = True
+                
+                # Calculate dimensions for the image
+                rect = inst
+                
+                # If custom dimensions are provided, adjust the rectangle
+                if image_width and image_height:
+                    # Center the image at the midpoint of the found text
+                    mid_x = (rect.x0 + rect.x1) / 2
+                    mid_y = (rect.y0 + rect.y1) / 2
+                    rect.x0 = mid_x - (image_width / 2)
+                    rect.x1 = mid_x + (image_width / 2)
+                    rect.y0 = mid_y - (image_height / 2)
+                    rect.y1 = mid_y + (image_height / 2)
+                
+                # Remove the template text by adding white rectangle
+                page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+                
+                # Insert the image
+                page.insert_image(rect, filename=img_temp.name)
+        
+        # Clean up the temporary file
+        os.unlink(img_temp.name)
+        
+        if not replacements_made:
+            return {
+                "success": False,
+                "error": f"Template text '{template_text}' not found in the document.",
+                "pdf_data": None
+            }
+        
+        # Save the modified PDF
+        output_buffer = io.BytesIO()
+        pdf.save(output_buffer)
+        pdf.close()
+        
+        return {
+            "success": True,
+            "error": None,
+            "pdf_data": output_buffer.getvalue()
+        }
+        
+    except Exception as e:
+        # Clean up the temporary file if it exists
+        try:
+            if 'img_temp' in locals() and os.path.exists(img_temp.name):
+                os.unlink(img_temp.name)
+        except:
+            pass
+        
+        return {
+            "success": False,
+            "error": f"Error replacing template with image: {str(e)}",
+            "pdf_data": None
+        }

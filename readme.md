@@ -1,8 +1,8 @@
 # Utility REST API Service
 
-![version](https://img.shields.io/badge/version-1.1.0-blue)
+![version](https://img.shields.io/badge/version-1.2.0-blue)
 
-**Utility REST API Service** adalah aplikasi backend yang dibuat menggunakan bahasa pemrograman **Python** dengan framework **FastAPI**. Aplikasi ini dirancang untuk menyediakan berbagai utilitas dan tools melalui antarmuka REST API, termasuk fitur konversi file PDF ke gambar atau teks, autentikasi menggunakan API key, dan pembatasan request (rate limiting).
+**Utility REST API Service** adalah aplikasi backend yang dibuat menggunakan bahasa pemrograman **Python** dengan framework **FastAPI**. Aplikasi ini dirancang untuk menyediakan berbagai utilitas dan tools melalui antarmuka REST API, termasuk fitur konversi file PDF ke gambar atau teks, penggantian template teks dengan gambar di PDF, tandatangan dokumen PDF, autentikasi menggunakan API key, dan pembatasan request (rate limiting).
 
 Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasikan ke berbagai frontend atau sistem lainnya melalui endpoint HTTP.
 
@@ -10,6 +10,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 
 - **Konversi PDF ke Gambar**: Mengubah file PDF menjadi satu gambar PNG yang digabungkan secara vertikal
 - **Konversi PDF ke Teks**: Ekstraksi teks dari file PDF dengan dukungan untuk dokumen yang dapat dicari
+- **Tandatangan Dokumen PDF**: Menandatangani dokumen PDF dengan menyisipkan gambar tanda tangan pada template ${sign}
 - **API Key Authentication**: Keamanan endpoint dengan API Key
 - **Rate Limiting**: Pembatasan jumlah request per waktu tertentu
 
@@ -65,16 +66,17 @@ cp .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Aplikasi akan berjalan di http://localhost:8000
+Aplikasi akan berjalan di http://localhost:8000, silahkan ganti prt 8000 engan prt yang diinginkan.
 
 ## 📚 Penggunaan API
 
 ### Endpoint
 
-- `GET /v1/about` - Informasi umum tentang layanan (tidak memerlukan API key)
+- `GET /v1/about` - Informasi umum tentang layanan
 - `GET /v1/health` - Health check untuk memastikan layanan berjalan (memerlukan API key)
 - `POST /v1/pdf/convert-to-image` - Konversi PDF ke gambar tunggal (memerlukan API key)
 - `POST /v1/pdf/convert-to-text` - Ekstraksi teks dari PDF (memerlukan API key)
+- `POST /v1/pdf/sign ` - Tandatangan dokumen PDF dengan menyisipkan gambar pada template ${sign} pada dokumen pdf (memerlukan API key)
 
 ## ⚙️ Konfigurasi
 
@@ -88,7 +90,7 @@ Konfigurasi dilakukan melalui file .env:
 
 ## 🛡️ Keamanan
 
-Semua endpoint API (kecuali `/v1/about`) dilindungi dengan API key authentication. Pastikan untuk menyimpan API key Anda dengan aman dan tidak membagikannya kepada pihak yang tidak berwenang.
+Semua endpoint API (kecuali `/v1/about` dan `/v1/health`) dilindungi dengan API key authentication. Pastikan untuk menyimpan API key Anda dengan aman dan tidak membagikannya kepada pihak yang tidak berwenang.
 
 API key harus disertakan pada setiap request dalam header `X-API-Key`.
 
@@ -113,4 +115,8 @@ Semua hak dilindungi. Kode ini dilindungi hak cipta dan tidak boleh digunakan, d
 - Layanan ini menggunakan PyMuPDF (fitz) untuk ekstraksi dan manipulasi PDF
 - Untuk PDF yang tidak memiliki teks yang dapat dicari, layanan ini dapat mendeteksi hal tersebut dan memberikan pesan error yang sesuai
 - Rate limiting diimplementasikan dengan SlowAPI dan menggunakan alamat IP klien sebagai kunci untuk pembatasan
-- Konversi pdf ke teks hanya bisa digunakan apabila pdf tersebut bukan dari hasil scanner.
+- Konversi pdf ke teks dan fitur tandatangan pdf hanya bisa digunakan apabila pdf tersebut bukan dari hasil scanner.
+
+## ⚠️ Catatan Penting
+
+Mohon tidak menjual atau mencari keuntungan secara pribadi dengan repository ini. Jika anda melanggar silahkan tanggungjawab sendiri di akhirat kelak. Terimakasih

@@ -1,11 +1,17 @@
 import io
+import os
+from typing import Optional
 from app.core.config import settings
 from app.api.v1.rate_limiter import limiter
 from fastapi.responses import PlainTextResponse
 from app.api.v1.dependencies import verify_api_key
 from fastapi.responses import StreamingResponse, JSONResponse
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Request
-from app.services.pdf_service import convert_pdf_to_single_image, convert_pdf_to_text
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Request, Form
+from app.services.pdf_service import (
+    convert_pdf_to_single_image, 
+    convert_pdf_to_text,
+    replace_template_with_image
+)
 
 router = APIRouter(prefix="/v1/pdf", tags=["pdf"])
 
@@ -64,4 +70,55 @@ async def convert_to_text(
             "page_count": result["page_count"]
         },
         headers={"Content-Disposition": "attachment; filename=extracted_text.json"}
+    )
+    
+@router.post("/sign")
+@limiter.limit(settings.RATE_LIMIT)
+async def sign_document_with_image(
+    request: Request,
+    pdf_file: UploadFile = File(...),
+    image_file: UploadFile = File(...),
+    template_text: str = Form("${sign}"),
+    image_width: Optional[float] = Form(None),
+    image_height: Optional[float] = Form(None),
+    x_api_key: str = Depends(verify_api_key)
+):
+    """
+    Replace template text in PDF with an image (e.g., signature)
+    
+    - **pdf_file**: The PDF file to process
+    - **image_file**: The image to insert (any standard format: PNG, JPG, etc.)
+    - **template_text**: The text pattern to replace (default: ${sign})
+    - **image_width**: Optional width to resize the image (in points)
+    - **image_height**: Optional height to resize the image (in points)
+    """
+    if pdf_file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="First file must be a PDF")
+    
+    # Validate image file
+    valid_image_types = ["image/png", "image/jpeg", "image/jpg", "image/gif"]
+    if image_file.content_type not in valid_image_types and not image_file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Second file must be an image")
+    
+    # Read the files
+    pdf_data = await pdf_file.read()
+    image_data = await image_file.read()
+    
+    # Replace template with image
+    result = await replace_template_with_image(
+        pdf_data, 
+        template_text, 
+        image_data,
+        image_width,
+        image_height
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=422, detail=result["error"])
+        
+    # Return the modified PDF
+    return StreamingResponse(
+        io.BytesIO(result["pdf_data"]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=modified_{pdf_file.filename}"}
     )
