@@ -10,7 +10,8 @@ from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Request
 from app.services.pdf_service import (
     convert_pdf_to_single_image, 
     convert_pdf_to_text,
-    replace_template_with_image
+    replace_template_with_image,
+    split_pdf_by_pages
 )
 
 router = APIRouter(prefix="/v1/pdf", tags=["pdf"])
@@ -83,15 +84,6 @@ async def sign_document_with_image(
     image_height: Optional[float] = Form(None),
     x_api_key: str = Depends(verify_api_key)
 ):
-    """
-    Replace template text in PDF with an image (e.g., signature)
-    
-    - **pdf_file**: The PDF file to process
-    - **image_file**: The image to insert (any standard format: PNG, JPG, etc.)
-    - **template_text**: The text pattern to replace (default: ${sign})
-    - **image_width**: Optional width to resize the image (in points)
-    - **image_height**: Optional height to resize the image (in points)
-    """
     if pdf_file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="First file must be a PDF")
     
@@ -122,3 +114,32 @@ async def sign_document_with_image(
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=modified_{pdf_file.filename}"}
     )
+    
+@router.post("/split-by-range")
+@limiter.limit(settings.RATE_LIMIT)
+async def split_pdf_range(
+    request: Request,
+    file: UploadFile = File(...),
+    start_page: int = Form(1),
+    end_page: Optional[int] = Form(None),
+    x_api_key: str = Depends(verify_api_key)
+):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+    
+    try:
+        data = await file.read()
+        result_pdf = await split_pdf_by_pages(data, start_page, end_page)
+        
+        filename = f"split_pages_{start_page}_to_{end_page or 'end'}.pdf"
+        
+        return StreamingResponse(
+            io.BytesIO(result_pdf),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")

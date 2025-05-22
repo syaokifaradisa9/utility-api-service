@@ -1,5 +1,6 @@
 import fitz
 from PIL import Image
+from typing import List, Optional
 import io
 import numpy as np
 import tempfile
@@ -181,19 +182,6 @@ async def convert_pdf_to_text_with_ocr(data: bytes, dpi: int = 300, lang: list =
         }
         
 async def replace_template_with_image(pdf_data: bytes, template_text: str, image_data: bytes, image_width: float = None, image_height: float = None) -> bytes:
-    """
-    Replace text template patterns in a PDF with an image
-    
-    Args:
-        pdf_data (bytes): The PDF file content
-        template_text (str): The template text to search for (e.g., "${sign}")
-        image_data (bytes): The image to insert
-        image_width (float, optional): Width to resize the image to (in points)
-        image_height (float, optional): Height to resize the image to (in points)
-        
-    Returns:
-        bytes: The modified PDF content
-    """
     try:
         # Open the PDF
         pdf = fitz.open(stream=pdf_data, filetype="pdf")
@@ -269,3 +257,36 @@ async def replace_template_with_image(pdf_data: bytes, template_text: str, image
             "error": f"Error replacing template with image: {str(e)}",
             "pdf_data": None
         }
+        
+
+async def split_pdf_by_pages(data: bytes, start_page: int = 1, end_page: Optional[int] = None) -> bytes:
+    try:
+        # Open the PDF
+        pdf = fitz.open(stream=data, filetype="pdf")
+        
+        # Validate page numbers
+        total_pages = len(pdf)
+        if start_page < 1 or start_page > total_pages:
+            raise ValueError(f"Start page must be between 1 and {total_pages}")
+        
+        if end_page is None:
+            end_page = total_pages
+        elif end_page < start_page or end_page > total_pages:
+            raise ValueError(f"End page must be between {start_page} and {total_pages}")
+        
+        # Create new PDF with selected pages
+        new_pdf = fitz.open()  # Create empty PDF
+        
+        # Copy pages (convert to 0-based indexing)
+        new_pdf.insert_pdf(pdf, from_page=start_page-1, to_page=end_page-1)
+        
+        # Save to bytes
+        output_buffer = io.BytesIO()
+        new_pdf.save(output_buffer)
+        new_pdf.close()
+        pdf.close()
+        
+        return output_buffer.getvalue()
+        
+    except Exception as e:
+        raise Exception(f"Error splitting PDF: {str(e)}")
