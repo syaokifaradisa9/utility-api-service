@@ -13,6 +13,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - **Tandatangan Dokumen PDF**: Menandatangani dokumen PDF dengan menyisipkan gambar tanda tangan pada template ${sign}
 - **Split/Pemisahan PDF**: Memisahkan dokumen PDF menjadi beberapa bagian berdasarkan rentang halaman tertentu
 - **Konversi DOCX ke PDF**: Mengubah file DOCX menjadi dokumen PDF
+- **Generate Barcode**: Membuat gambar barcode dari data yang diberikan
 - **API Key Authentication**: Keamanan endpoint dengan API Key
 - **Rate Limiting**: Pembatasan jumlah request per waktu tertentu
 
@@ -23,6 +24,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - [PIL/Pillow](https://pillow.readthedocs.io/) - Library untuk pemrosesan gambar
 - [SlowAPI](https://github.com/laurentS/slowapi) - Rate limiting middleware untuk FastAPI
 - [Python-dotenv](https://github.com/theskumar/python-dotenv) - Manajemen konfigurasi environment
+- [python-barcode](https://python-barcode.readthedocs.io/en/stable/) - Library untuk pembuatan barcode
 
 ## 📋 Prasyarat
 
@@ -96,6 +98,10 @@ Aplikasi akan berjalan di http://localhost:8000, silahkan ganti port 8000 dengan
 #### Konversi DOCX
 
 - `POST /v1/docx/convert-to-pdf` - Konversi DOCX ke PDF (memerlukan API key)
+
+#### Barcode
+
+- `POST /v1/barcode/generate-barcode` - Membuat gambar barcode dari data yang diberikan, dengan opsi menyertakan logo di tengah (memerlukan API key)
 
 ## ⚙️ Konfigurasi
 

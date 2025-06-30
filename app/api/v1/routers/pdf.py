@@ -1,9 +1,7 @@
 import io
-import os
 from typing import Optional
 from app.core.config import settings
 from app.api.v1.rate_limiter import limiter
-from fastapi.responses import PlainTextResponse
 from app.api.v1.dependencies import verify_api_key
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Request, Form
