@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from slowapi.middleware import SlowAPIMiddleware
 from app.core.config import settings
 from app.api.v1.rate_limiter import limiter
-from app.api.v1.routers import health, pdf, about
+from app.api.v1.routers import health, pdf, about, docx
 from app.utils.logger import logger
 
 # Create FastAPI app and attach rate limiter
@@ -19,6 +19,7 @@ async def startup_event():
 app.include_router(health.router)
 app.include_router(pdf.router)
 app.include_router(about.router)
+app.include_router(docx.router)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

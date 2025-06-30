@@ -12,6 +12,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - **Konversi PDF ke Teks**: Ekstraksi teks dari file PDF dengan dukungan untuk dokumen yang dapat dicari
 - **Tandatangan Dokumen PDF**: Menandatangani dokumen PDF dengan menyisipkan gambar tanda tangan pada template ${sign}
 - **Split/Pemisahan PDF**: Memisahkan dokumen PDF menjadi beberapa bagian berdasarkan rentang halaman tertentu
+- **Konversi DOCX ke PDF**: Mengubah file DOCX menjadi dokumen PDF
 - **API Key Authentication**: Keamanan endpoint dengan API Key
 - **Rate Limiting**: Pembatasan jumlah request per waktu tertentu
 
@@ -22,6 +23,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - [PIL/Pillow](https://pillow.readthedocs.io/) - Library untuk pemrosesan gambar
 - [SlowAPI](https://github.com/laurentS/slowapi) - Rate limiting middleware untuk FastAPI
 - [Python-dotenv](https://github.com/theskumar/python-dotenv) - Manajemen konfigurasi environment
+- [python-docx](https://python-docx.readthedocs.io/en/latest/) - Library untuk manipulasi file DOCX
 
 ## 📋 Prasyarat
 
@@ -91,6 +93,10 @@ Aplikasi akan berjalan di http://localhost:8000, silahkan ganti port 8000 dengan
 
 - `POST /v1/pdf/split-by-range` - Memisahkan PDF berdasarkan rentang halaman tertentu (memerlukan API key)
 
+#### Konversi DOCX
+
+- `POST /v1/docx/convert-to-pdf` - Konversi DOCX ke PDF (memerlukan API key)
+
 ## ⚙️ Konfigurasi
 
 Konfigurasi dilakukan melalui file .env:
@@ -130,6 +136,7 @@ Semua hak dilindungi. Kode ini dilindungi hak cipta dan tidak boleh digunakan, d
 - Rate limiting diimplementasikan dengan SlowAPI dan menggunakan alamat IP klien sebagai kunci untuk pembatasan
 - Konversi PDF ke teks dan fitur tandatangan PDF hanya bisa digunakan apabila PDF tersebut bukan dari hasil scanner
 - Fitur split PDF mendukung metode pemisahan dengan rentang halaman tertentu
+- Layanan ini menggunakan python-docx untuk konversi DOCX ke PDF
 
 ## ⚠️ Catatan Penting
 
