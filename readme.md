@@ -23,13 +23,13 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - [PIL/Pillow](https://pillow.readthedocs.io/) - Library untuk pemrosesan gambar
 - [SlowAPI](https://github.com/laurentS/slowapi) - Rate limiting middleware untuk FastAPI
 - [Python-dotenv](https://github.com/theskumar/python-dotenv) - Manajemen konfigurasi environment
-- [python-docx](https://python-docx.readthedocs.io/en/latest/) - Library untuk manipulasi file DOCX
 
 ## 📋 Prasyarat
 
 - Python 3.8 atau lebih baru
 - pip (Python package manager)
 - Dependensi sistem untuk PyMuPDF (fitz)
+- LibreOffice (for cross-platform DOCX to PDF conversion)
 
 ## 🔧 Instalasi
 
@@ -136,7 +136,7 @@ Semua hak dilindungi. Kode ini dilindungi hak cipta dan tidak boleh digunakan, d
 - Rate limiting diimplementasikan dengan SlowAPI dan menggunakan alamat IP klien sebagai kunci untuk pembatasan
 - Konversi PDF ke teks dan fitur tandatangan PDF hanya bisa digunakan apabila PDF tersebut bukan dari hasil scanner
 - Fitur split PDF mendukung metode pemisahan dengan rentang halaman tertentu
-- Layanan ini menggunakan python-docx untuk konversi DOCX ke PDF
+- Konversi DOCX ke PDF akan menggunakan Microsoft Word jika tersedia di Windows untuk kualitas terbaik, jika tidak, akan menggunakan LibreOffice.
 
 ## ⚠️ Catatan Penting
 

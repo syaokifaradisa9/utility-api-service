@@ -11,5 +11,5 @@ slowapi
 python-multipart
 Pillow
 PyMuPDF
-docx2pdf==0.1.8 
+docx2pdf==0.1.8
 numpy
