@@ -12,6 +12,7 @@ Aplikasi ini cocok digunakan sebagai layanan mandiri di VPS dan bisa diintegrasi
 - **Konversi PDF ke Teks**: Ekstraksi teks dari file PDF dengan dukungan untuk dokumen yang dapat dicari
 - **Tandatangan Dokumen PDF**: Menandatangani dokumen PDF dengan menyisipkan gambar tanda tangan pada template ${sign}
 - **Split/Pemisahan PDF**: Memisahkan dokumen PDF menjadi beberapa bagian berdasarkan rentang halaman tertentu
+- **Hapus Halaman Kosong**: Menghapus halaman yang tidak memiliki konten isi (body) dari sebuah PDF.
 - **Konversi DOCX ke PDF**: Mengubah file DOCX menjadi dokumen PDF
 - **Generate Barcode**: Membuat gambar barcode dari data yang diberikan
 - **API Key Authentication**: Keamanan endpoint dengan API Key
@@ -90,6 +91,7 @@ Aplikasi akan berjalan di http://localhost:8000, silahkan ganti port 8000 dengan
 #### Manipulasi PDF
 
 - `POST /v1/pdf/sign` - Tandatangan dokumen PDF dengan menyisipkan gambar pada template ${sign} (memerlukan API key)
+- `POST /v1/pdf/remove-empty-pages` - Menghapus halaman kosong dari PDF (memerlukan API key)
 
 #### Split/Pemisahan PDF
 

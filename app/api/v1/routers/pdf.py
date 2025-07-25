@@ -9,7 +9,8 @@ from app.services.pdf_service import (
     convert_pdf_to_single_image, 
     convert_pdf_to_text,
     replace_template_with_image,
-    split_pdf_by_pages
+    split_pdf_by_pages,
+    remove_empty_pages
 )
 
 router = APIRouter(prefix="/v1/pdf", tags=["pdf"])
@@ -141,3 +142,32 @@ async def split_pdf_range(
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+
+@router.post("/remove-empty-pages")
+@limiter.limit(settings.RATE_LIMIT)
+async def remove_empty_pdf_pages(
+    request: Request,
+    file: UploadFile = File(...),
+    x_api_key: str = Depends(verify_api_key)
+):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+    
+    try:
+        data = await file.read()
+        result_pdf = await remove_empty_pages(data)
+        
+        # Create a filename for the processed file
+        original_filename = file.filename.rsplit('.', 1)[0]
+        new_filename = f"{original_filename}_processed.pdf"
+        
+        return StreamingResponse(
+            io.BytesIO(result_pdf),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={new_filename}"}
+        )
+        
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")

@@ -258,6 +258,46 @@ async def replace_template_with_image(pdf_data: bytes, template_text: str, image
             "pdf_data": None
         }
         
+async def is_page_body_empty(page: fitz.Page, header_margin: float = 0.15, footer_margin: float = 0.15, text_threshold: int = 20) -> bool:
+    """
+    Check if a page body is empty, ignoring headers and footers.
+    A page is considered empty if its body has very little text, no significant images, and no vector graphics.
+    The body is the area of the page excluding the top and bottom margins.
+    """
+    page_rect = page.rect
+    page_height = page_rect.height
+    
+    # Define the body area, excluding header and footer
+    body_rect = fitz.Rect(
+        page_rect.x0,
+        page_rect.y0 + page_height * header_margin,
+        page_rect.x1,
+        page_rect.y1 - page_height * footer_margin
+    )
+
+    # 1. Check for text content within the body
+    text = page.get_text("text", clip=body_rect)
+    if len(text.strip()) > text_threshold:
+        return False
+
+    # 2. Check for images within the body
+    images = page.get_images(full=True)
+    for img_info in images:
+        img_rects = page.get_image_rects(img_info[0])
+        for rect in img_rects:
+            if rect.intersects(body_rect):
+                # Check if the intersection area is significant
+                if rect.intersect(body_rect).get_area() > 100: # ignore very small images/logos
+                    return False
+
+    # 3. Check for vector graphics (drawings) within the body
+    drawings = page.get_drawings()
+    for path in drawings:
+        if path["rect"].intersects(body_rect):
+            # If any drawing is in the body, it's not empty
+            return False
+
+    return True
 
 async def split_pdf_by_pages(data: bytes, start_page: int = 1, end_page: Optional[int] = None) -> bytes:
     try:
@@ -290,3 +330,35 @@ async def split_pdf_by_pages(data: bytes, start_page: int = 1, end_page: Optiona
         
     except Exception as e:
         raise Exception(f"Error splitting PDF: {str(e)}")
+
+async def remove_empty_pages(data: bytes) -> bytes:
+    """
+    Removes empty pages from a PDF document.
+    An empty page is defined by the 'is_page_body_empty' function.
+    """
+    try:
+        # Open the original PDF
+        pdf = fitz.open(stream=data, filetype="pdf")
+        
+        # Create a new PDF to store non-empty pages
+        new_pdf = fitz.open()
+        
+        # Iterate through all pages and add non-empty ones to the new PDF
+        for page_num in range(len(pdf)):
+            page = pdf.load_page(page_num)
+            if not await is_page_body_empty(page):
+                new_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
+        
+        if len(new_pdf) == 0:
+            raise ValueError("All pages in the document were considered empty.")
+
+        # Save the new PDF to a buffer
+        output_buffer = io.BytesIO()
+        new_pdf.save(output_buffer)
+        new_pdf.close()
+        pdf.close()
+        
+        return output_buffer.getvalue()
+        
+    except Exception as e:
+        raise Exception(f"Error removing empty pages: {str(e)}")
